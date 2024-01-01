@@ -4,7 +4,12 @@ const User = require('../models/user')
 
 usersRouter.post('/', async (request, response) => {
   const { username, name, password } = request.body
-
+  console.log(username)
+  console.log(password)
+  console.log(name)
+  if (!password) {
+    return response.status(400).json({ error: 'Password is required' });
+  }
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(password, saltRounds)
 
@@ -20,8 +25,8 @@ usersRouter.post('/', async (request, response) => {
 })
 
 usersRouter.get('/', async (request, response) => {
-    const users = await User.find({}).populate('blogs')
-    response.json(users)
-  })
+  const users = await User.find({}).populate('blogs')
+  response.json(users)
+})
 
 module.exports = usersRouter
