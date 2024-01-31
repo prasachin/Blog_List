@@ -1,5 +1,4 @@
 const blogRouter = require("express").Router();
-// const { request, response } = require('../app')
 const blogs = require("../models/blog");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
@@ -36,6 +35,7 @@ blogRouter.post("/", async (request, response) => {
       ...blogdata,
       user: user._id,
     });
+
     const result = await blog.save();
     user.blogs = user.blogs.concat(result._id);
     await user.save();
@@ -49,38 +49,13 @@ blogRouter.post("/", async (request, response) => {
   }
 });
 
-// blogRouter.delete('/:id', async (request, response) => {
-//     try {
-//         const decodedToken = jwt.verify(gettoken(request), process.env.SECRET);
-//         if (!decodedToken) {
-//             return response.status(401).json({ error: 'Token invalid' });
-//         }
-
-//         const user = await User.findById(decodedToken.id);
-//         if (!user) {
-//             return response.status(404).json({ error: 'User not found' });
-//         }
-
-//         const deletedBlog = await blogs.findByIdAndDelete(request.params.id);
-//         if (!deletedBlog) {
-//             return response.status(404).json({ error: 'Blog not found' });
-//         }
-
-//         response.status(204).end();
-//         console.log('Deleted successfully!');
-//     } catch (error) {
-//         console.error('Failed', error.message);
-//         response.status(500).json({ error: 'Internal Server Error' });
-//     }
-// });
-
 blogRouter.delete("/:id", async (request, response) => {
   try {
     const dlt = await blogs.findByIdAndDelete(request.params.id);
     response.status(204).end();
     console.log("deleted succesfully !");
   } catch (error) {
-    console.error("cant delete ", error.message);
+    console.error("cant delete ", error.message); 
   }
 });
 
