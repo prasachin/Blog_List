@@ -55,7 +55,7 @@ blogRouter.delete("/:id", async (request, response) => {
     response.status(204).end();
     console.log("deleted succesfully !");
   } catch (error) {
-    console.error("cant delete ", error.message); 
+    console.error("cant delete ", error.message);
   }
 });
 
