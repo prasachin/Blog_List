@@ -29,6 +29,8 @@ loginRouter.post("/", async (request, response) => {
       username: user.username,
       name: user.name,
       profileicon: user.profileicon,
+      blogs: user.blogs,
+      id: user._id,
     });
   } catch (error) {
     console.error("Error during login:", error);
