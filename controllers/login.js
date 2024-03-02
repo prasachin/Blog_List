@@ -24,9 +24,12 @@ loginRouter.post("/", async (request, response) => {
 
     const token = jwt.sign(userForToken, process.env.SECRET);
 
-    response
-      .status(200)
-      .json({ token, username: user.username, name: user.name });
+    response.status(200).json({
+      token,
+      username: user.username,
+      name: user.name,
+      profileicon: user.profileicon,
+    });
   } catch (error) {
     console.error("Error during login:", error);
     response.status(500).json({ error: "Internal server error" });
