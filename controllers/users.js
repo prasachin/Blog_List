@@ -51,4 +51,18 @@ usersRouter.get("/", async (request, response) => {
   response.json(users);
 });
 
+usersRouter.put("/:id", async (request, response) => {
+  const id = parseInt(request.params.id);
+  const { name, username, profileicon } = request.body;
+  const users = await User.find({}).populate("blogs");
+  const index = users.findIndex((user) => user.id === id);
+
+  if (index !== -1) {
+    users[index] = { ...users[index], name, username, profileicon };
+    response.json({ message: "User updated successfully", user: users[index] });
+  } else {
+    response.status(404).json({ error: "User not found" });
+  }
+});
+
 module.exports = usersRouter;
