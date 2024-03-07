@@ -17,34 +17,30 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({
-  storage,
+  storage: storage,
 });
 
-usersRouter.post(
-  "/",
-  upload.single("profileicon"),
-  async (request, response) => {
-    const { username, name, password } = request.body;
+usersRouter.post("/", upload.any("profileicon"), async (request, response) => {
+  const { username, name, password } = request.body;
 
-    const profileiconlocalpath = request.file ? request.file.path : " ";
-    const profileiconpath = await UploadOncloudinary(profileiconlocalpath);
+  const profileiconlocalpath = request.file ? request.file.path : " ";
+  const profileiconpath = await UploadOncloudinary(profileiconlocalpath);
 
-    if (!password) {
-      return response.status(400).json({ error: "Password is required" });
-    }
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
-
-    const user = new User({
-      username,
-      name,
-      passwordHash,
-      profileicon: profileiconpath.url,
-    });
-    const savedUser = await user.save();
-    response.status(201).json(savedUser);
+  if (!password) {
+    return response.status(400).json({ error: "Password is required" });
   }
-);
+  const saltRounds = 10;
+  const passwordHash = await bcrypt.hash(password, saltRounds);
+
+  const user = new User({
+    username,
+    name,
+    passwordHash,
+    profileicon: profileiconpath.url,
+  });
+  const savedUser = await user.save();
+  response.status(201).json(savedUser);
+});
 
 usersRouter.get("/", async (request, response) => {
   const users = await User.find({}).populate("blogs");

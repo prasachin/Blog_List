@@ -3,13 +3,13 @@ const app = express();
 const config = require("./utils/config");
 const logger = require("./utils/logger");
 const middleware = require("./utils/middleware");
-const bodyparser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const BlogRouter = require("./controllers/blogs");
 const usersRouter = require("./controllers/users");
 const loginRouter = require("./controllers/login");
 const url = config.MONGODB_URI;
+global.rootPath = __dirname;
 
 logger.info("connecting to ", config.MONGODB_URI);
 
