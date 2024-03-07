@@ -9,7 +9,6 @@ const BlogRouter = require("./controllers/blogs");
 const usersRouter = require("./controllers/users");
 const loginRouter = require("./controllers/login");
 const url = config.MONGODB_URI;
-global.rootPath = __dirname;
 
 logger.info("connecting to ", config.MONGODB_URI);
 
