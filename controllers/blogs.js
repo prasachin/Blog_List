@@ -2,6 +2,9 @@ const blogRouter = require("express").Router();
 const blogs = require("../models/blog");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const { UploadOncloudinaryvid } = require("../utils/cloudinary");
 
 const gettoken = (request) => {
   const authorization = request.get("authorization");
@@ -14,26 +17,49 @@ const gettoken = (request) => {
   return null;
 };
 
-blogRouter.post("/", async (request, response) => {
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const destinationPath = path.join(__dirname, "../public/videos");
+    cb(null, destinationPath);
+  },
+
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({
+  storage,
+});
+
+blogRouter.post("/", upload.single("video"), async (request, response) => {
   const blogdata = request.body;
+
+  let vidlocalpath = "";
+  let vidpath = "";
+
+  if (request.file && request.file.path) {
+    vidlocalpath = request.file.path;
+    vidpath = await UploadOncloudinaryvid(vidlocalpath);
+  }
+
   try {
     const decodedtoken = jwt.verify(gettoken(request), process.env.SECRET);
-    // const decodedtoken=request.token
-    // console.log(blog)
-    // console.log(process.env.SECRET, gettoken(request))
-    // console.log(decodedtoken)
+
     if (!decodedtoken) {
       return response.status(401).json({ error: "Token invalid" });
     }
+
     const user = await User.findById(decodedtoken.id);
-    // console.log(user)
-    // console.log(decodedtoken.id)
+
     if (!user) {
       return response.status(404).json({ error: "User not found" });
     }
+
     const blog = new blogs({
       ...blogdata,
       user: user._id,
+      video: vidpath ? vidpath.url : "",
     });
 
     const result = await blog.save();

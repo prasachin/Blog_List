@@ -32,6 +32,9 @@ const BlogSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  video: {
+    type: String,
+  },
   comments: [CommentSchema],
 });
 
