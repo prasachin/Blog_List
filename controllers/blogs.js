@@ -1,5 +1,5 @@
 const blogRouter = require("express").Router();
-const blogs = require("../models/blog");
+const Blog = require("../models/blog");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
@@ -56,7 +56,7 @@ blogRouter.post("/", upload.single("video"), async (request, response) => {
       return response.status(404).json({ error: "User not found" });
     }
 
-    const blog = new blogs({
+    const blog = new Blog({
       ...blogdata,
       user: user._id,
       video: vidpath ? vidpath.url : "",
@@ -77,7 +77,7 @@ blogRouter.post("/", upload.single("video"), async (request, response) => {
 
 blogRouter.delete("/:id", async (request, response) => {
   try {
-    const dlt = await blogs.findByIdAndDelete(request.params.id);
+    const dlt = await Blog.findByIdAndDelete(request.params.id);
     response.status(204).end();
     console.log("deleted succesfully !");
   } catch (error) {
@@ -86,23 +86,21 @@ blogRouter.delete("/:id", async (request, response) => {
 });
 
 blogRouter.get("/", async (request, response) => {
-  const notes = await blogs.find({}).populate("user");
+  const notes = await Blog.find({}).populate("user");
 
   response.json(notes);
 });
 
 blogRouter.get("/:id", async (request, response) => {
-  const note = await blogs
-    .find((note) => {
-      note.id === id;
-    })
-    .populate("user");
+  const note = await Blog.find((note) => {
+    note.id === id;
+  }).populate("user");
 
   response.json(note);
 });
 
 blogRouter.put("/:id", async (request, response) => {
-  const blog = await blogs.findById(request.params.id);
+  const blog = await Blog.findById(request.params.id);
   const { id, comment } = request.body;
 
   if (!blog) {

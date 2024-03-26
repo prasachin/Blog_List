@@ -45,6 +45,7 @@ BlogSchema.set("toJSON", {
     delete returnedObject.__v;
   },
 });
+
 const Blog = mongoose.model("Blog", BlogSchema);
 
 module.exports = Blog;
