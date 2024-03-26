@@ -33,7 +33,7 @@ const upload = multer({
 });
 
 blogRouter.post("/", upload.single("video"), async (request, response) => {
-  const blogdata = request.body;
+  const { title, author, url, likes } = request.body;
 
   let vidlocalpath = "";
   let vidpath = "";
@@ -57,7 +57,10 @@ blogRouter.post("/", upload.single("video"), async (request, response) => {
     }
 
     const blog = new Blog({
-      ...blogdata,
+      title,
+      author,
+      url,
+      likes,
       user: user._id,
       video: vidpath ? vidpath.url : "",
     });
