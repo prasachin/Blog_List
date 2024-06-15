@@ -4,21 +4,19 @@ const User = require("../models/user");
 const multer = require("multer");
 const path = require("path");
 const { UploadOncloudinary } = require("../utils/cloudinary");
+const mongoose = require("mongoose"); // Import mongoose
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const destinationPath = path.join(__dirname, "../public/images");
     cb(null, destinationPath);
   },
-
   filename: function (req, file, cb) {
     cb(null, file.originalname);
   },
 });
 
-const upload = multer({
-  storage,
-});
+const upload = multer({ storage });
 
 usersRouter.post(
   "/",
@@ -51,18 +49,49 @@ usersRouter.get("/", async (request, response) => {
   response.json(users);
 });
 
-usersRouter.put("/:id", async (request, response) => {
-  const id = parseInt(request.params.id);
-  const { name, username, profileicon } = request.body;
-  const users = await User.find({}).populate("blogs");
-  const index = users.findIndex((user) => user.id === id);
+usersRouter.put(
+  "/:id",
+  upload.single("profileicon"),
+  async (request, response) => {
+    const { username, name, password } = request.body;
+    const { id } = request.params;
 
-  if (index !== -1) {
-    users[index] = { ...users[index], name, username, profileicon };
-    response.json({ message: "User updated successfully", user: users[index] });
-  } else {
-    response.status(404).json({ error: "User not found" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return response.status(400).send({ error: "Invalid user ID" });
+    }
+
+    let profileiconpath = null;
+    if (request.file) {
+      const profileiconlocalpath = request.file.path;
+      const uploadResponse = await UploadOncloudinary(profileiconlocalpath);
+      profileiconpath = uploadResponse.url;
+    }
+
+    const updateData = {};
+    if (username) updateData.username = username;
+    if (name) updateData.name = name;
+    if (password) {
+      const saltRounds = 10;
+      updateData.password = await bcrypt.hash(password, saltRounds);
+    }
+
+    if (profileiconpath) {
+      updateData.profileicon = profileiconpath;
+    }
+
+    try {
+      const updatedUser = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+      }).populate("blogs");
+      if (updatedUser) {
+        response.json(updatedUser);
+      } else {
+        response.status(404).json({ error: "User not found" });
+      }
+    } catch (error) {
+      response.status(500).json({ error: "Failed to update user" });
+    }
   }
-});
+);
 
 module.exports = usersRouter;
